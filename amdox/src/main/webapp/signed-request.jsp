@@ -70,6 +70,10 @@ POSSIBILITY OF SUCH DAMAGE.
                 Sfdc.canvas.byId('firstname').innerHTML = sr.context.user.firstName;
                 Sfdc.canvas.byId('lastname').innerHTML = sr.context.user.lastName;
                 Sfdc.canvas.byId('username').innerHTML = sr.context.user.userName;
+                Sfdc.canvas.byId('email').innerHTML = sr.context.user.email;
+                Sfdc.canvas.byId('company').innerHTML = sr.context.organization.name;
+                Sfdc.canvas.byId('email').innerHTML = sr.context.user.email;
+                Sfdc.canvas.byId('company').innerHTML = sr.context.organization.name;
 
 
                 chatterTalk.init(sr, "chatter-submit", "speech-input-field", function(data) {
