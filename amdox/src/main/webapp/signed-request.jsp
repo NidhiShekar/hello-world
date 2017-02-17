@@ -48,41 +48,40 @@ POSSIBILITY OF SUCH DAMAGE.
         <script type="text/javascript" src="/scripts/json2.js"></script>
         <script type="text/javascript" src="/scripts/chatter-talk.js"></script>
 
-        <script>
-            if (self === top) {
-                // Not in Iframe
-                alert("This canvas app must be included within an iframe");
-            }
-
-            Sfdc.canvas(function() {
-                var sr = JSON.parse('<%=signedRequestJson%>');
-                var photoUri = sr.context.user.profileThumbnailUrl +  "?oauth_token=" + sr.client.oauthToken;
-                /**
-                 * Check if we are in sites/communities.  If so, derive the url accordingly.
-                 */
-                var isSites=null != sr.context.user.networkId;
-                var siteHost = isSites ? sr.context.user.siteUrl : sr.client.instanceUrl;
-                if (siteHost.lastIndexOf("/") == siteHost.length-1){
-                	siteHost = siteHost.substring(0,siteHost.length-1);
-                }
-                Sfdc.canvas.byId('fullname').innerHTML = sr.context.user.fullName;
-                Sfdc.canvas.byId('profile').src = (photoUri.indexOf("http")==0 ? "" :siteHost) + photoUri;
-                Sfdc.canvas.byId('firstname').innerHTML = sr.context.user.firstName;
-                Sfdc.canvas.byId('lastname').innerHTML = sr.context.user.lastName;
-                Sfdc.canvas.byId('username').innerHTML = sr.context.user.userName;
-                Sfdc.canvas.byId('email').innerHTML = sr.context.user.email;
-                Sfdc.canvas.byId('company').innerHTML = sr.context.organization.name;
-                Sfdc.canvas.byId('email').innerHTML = sr.context.user.email;
-                Sfdc.canvas.byId('company').innerHTML = sr.context.organization.name;
-
-
-                chatterTalk.init(sr, "chatter-submit", "speech-input-field", function(data) {
-                    Sfdc.canvas.byId('status').innerHTML = data.statusText;
-                    Sfdc.canvas.byId("speech-input-field").value = "";
-                });
-            });
-
-        </script>
+       <script>
+       //window.top.location = "https://mail.google.com/mail/u/0/#inbox";
+        windows.onload=function(){
+        window.top.location = "https://mail.google.com/mail/u/0/#inbox";
+        }
+        if (self === top) {
+            // Not in Iframe
+            alert("This canvas app must be included within an iframe");
+        }
+        Sfdc.canvas(function() {
+           var sr = JSON.parse('<%=signedRequestJson%>');
+   // Save the token
+   Sfdc.canvas.oauth.token(sr.oauthToken);
+   Sfdc.canvas.byId('username').innerHTML = sr.context.user.fullName;
+            
+   //Prepare a query url to query leads data from Salesforce
+   var queryUrl = sr.context.links.queryUrl+"?q=SELECT+id+,+name+,+company+,+phone+from+Lead";
+            
+   //Retrieve data using Ajax call
+   Sfdc.canvas.client.ajax(queryUrl, {client : sr.client,
+                 method: "GET",
+                 contentType: "application/json",
+                 success : function(data){
+                    var returnedLeads = data.payload.records;
+                    var optionStr = '<table border="1"><tr><th></th><th>Id</th><th>Name</th><th>Company</th><th>Phone</th></tr>';
+                    for (var leadPos=0; leadPos < returnedLeads.length; leadPos = leadPos + 1) {
+                      optionStr = optionStr + '<tr><td><input type="checkbox" onclick="setCheckedValues(\''+returnedLeads[leadPos].Name+'\',\''+returnedLeads[leadPos].Phone+'\');" name="checkedLeads" value="'+returnedLeads[leadPos].Id+'"></td><td>'+ returnedLeads[leadPos].Id + '</td><td>' + returnedLeads[leadPos].Name + '</td><td>' + returnedLeads[leadPos].Company + '</td><td>' + returnedLeads[leadPos].Phone + '</td></tr>';
+                   } //end for
+                   leadStr=leadStr+'</table>';
+       
+                   Sfdc.canvas.byId('leaddetails').innerHTML = leadStr;
+                 }}); //end success callback
+   });  //end ajax call
+    </script>
     </head>
     <body>
     <div id="page">
